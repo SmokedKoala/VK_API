@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -23,10 +24,26 @@ public class MainActivity extends AppCompatActivity {
     private EditText searchField;
     private Button searchButton;
     private TextView resultText;
+    private TextView errorMessage;
+    private ProgressBar loadindIndicator;
+
+    private void showResultView(){
+        resultText.setVisibility(View.VISIBLE);
+        errorMessage.setVisibility(View.INVISIBLE);
+    }
+
+    private void showErrorView(){
+        resultText.setVisibility(View.INVISIBLE);
+        errorMessage.setVisibility(View.VISIBLE);
+    }
 
 
     class MyAsyncTask extends AsyncTask<URL, Void, String>{
 
+        @Override
+        protected void onPreExecute(){
+            loadindIndicator.setVisibility(View.VISIBLE);
+        }
         @Override
         protected String doInBackground(URL... urls) {
             String response = null;
@@ -38,20 +55,26 @@ public class MainActivity extends AppCompatActivity {
             return response;
         }
         @Override
-        protected void onPostExecute(String response){
+        protected void onPostExecute(String response) {
             String firstName = null;
             String lastName = null;
-            try {
-                JSONObject jsonResponse = new JSONObject(response);
-                JSONArray jsonArray = jsonResponse.getJSONArray("response");
-                JSONObject userInfo = jsonArray.getJSONObject(0);
-                firstName = userInfo.getString("first_name");
-                lastName = userInfo.getString("last_name");
+            if (response != null && !response.equals("")){
+                try {
+                    JSONObject jsonResponse = new JSONObject(response);
+                    JSONArray jsonArray = jsonResponse.getJSONArray("response");
+                    JSONObject userInfo = jsonArray.getJSONObject(0);
+                    firstName = userInfo.getString("first_name");
+                    lastName = userInfo.getString("last_name");
 
-            } catch (JSONException e) {
-                e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                resultText.setText(firstName+" "+lastName);
+                showResultView();
+        } else {
+                showErrorView();
             }
-            resultText.setText(firstName+" "+lastName);
+            loadindIndicator.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -76,6 +99,8 @@ public class MainActivity extends AppCompatActivity {
         searchButton = findViewById(R.id.button_for_search);
         resultText = findViewById(R.id.result);
         searchButton.setOnClickListener(onClickListener);
+        errorMessage = findViewById(R.id.error_message);
+        loadindIndicator = findViewById(R.id.loading_indicator);
 
     }
 

@@ -2,4 +2,5 @@
     <string name="app_name">VK_API</string>
     <string name="search">Search</string>
     <string name="id">Введите id Вконтакте</string>
+    <string name="error_message">Ooops Something went wrong!</string>
 </resources>
